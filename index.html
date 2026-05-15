@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -17,6 +16,7 @@
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         body { background-color: var(--bg-dark); color: var(--text-main); }
 
+        /* Header & Kolom Pencarian */
         header {
             background-color: rgba(15, 16, 22, 0.95);
             padding: 15px 5%;
@@ -30,6 +30,28 @@
         }
 
         header h1 { color: var(--primary); font-size: 24px; text-transform: uppercase; letter-spacing: 2px; }
+
+        .search-container {
+            position: relative;
+            width: 300px;
+        }
+
+        .search-container input {
+            width: 100%;
+            padding: 10px 15px;
+            background: #222533;
+            border: 1px solid #33384f;
+            border-radius: 20px;
+            color: white;
+            font-size: 14px;
+            outline: none;
+            transition: 0.3s;
+        }
+
+        .search-container input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 8px rgba(229, 9, 20, 0.5);
+        }
 
         .container { max-width: 1200px; margin: 30px auto; padding: 0 20px; }
 
@@ -64,44 +86,57 @@
         }
 
         .movie-card:hover { transform: scale(1.05); z-index: 5; }
-
         .movie-poster { width: 100%; height: 300px; object-fit: cover; }
-
         .movie-info { padding: 15px; }
         .movie-title { font-size: 16px; font-weight: bold; margin-bottom: 5px; }
         .movie-meta { font-size: 12px; color: var(--text-muted); display: flex; justify-content: space-between; }
 
-        /* Modal Player */
-        .modal {
+        /* Halaman Nonton / Player Overlay */
+        .player-page {
             display: none;
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.9);
+            background: #000;
             z-index: 2000;
             overflow-y: auto;
-        }
-
-        .modal-content {
-            max-width: 900px;
-            margin: 50px auto;
-            background: #000;
             padding: 20px;
-            border-radius: 12px;
-            position: relative;
         }
 
-        .close-btn {
-            position: absolute;
-            right: 20px; top: 10px;
-            font-size: 30px; color: #fff; cursor: pointer;
+        .player-content {
+            max-width: 900px;
+            margin: 20px auto;
+        }
+
+        /* Tombol Kembali */
+        .btn-back {
+            display: inline-flex;
+            align-items: center;
+            background: #222;
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: bold;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-bottom: 20px;
+            transition: 0.3s;
+            text-transform: uppercase;
+        }
+
+        .btn-back:hover {
+            background: var(--primary);
         }
 
         .video-container {
             position: relative;
             padding-bottom: 56.25%;
             height: 0;
-            background: #000;
+            background: #111;
             margin-bottom: 20px;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 0 20px rgba(229, 9, 20, 0.3);
         }
 
         .video-container iframe {
@@ -111,122 +146,162 @@
 
         .btn-action {
             display: inline-block;
-            padding: 10px 20px;
+            padding: 12px 25px;
             background: var(--primary);
             color: #fff;
             text-decoration: none;
             border-radius: 5px;
             font-weight: bold;
             margin-top: 10px;
+            transition: 0.3s;
         }
 
         .btn-download { background: #2ed573; margin-left: 10px; }
+        .btn-download:hover { background: #26af5f; }
+        .btn-action:hover:not(.btn-download) { background: #ff1e2b; }
 
-        footer { text-align: center; padding: 40px; color: var(--text-muted); font-size: 14px; }
+        .no-results {
+            text-align: center;
+            color: var(--text-muted);
+            grid-column: 1 / -1;
+            padding: 50px 0;
+        }
+
+        footer { text-align: center; padding: 40px; color: var(--text-muted); font-size: 14px; margin-top: 50px; }
     </style>
 </head>
 <body>
 
+    <!-- Header dengan Fitur Pencarian -->
     <header>
         <h1>MovieStation</h1>
-        <div id="search-box">
-            <!-- Search bar bisa ditambahkan di sini -->
+        <div class="search-container">
+            <input type="text" id="searchInput" onkeyup="searchMovie()" placeholder="Cari film di sini...">
         </div>
     </header>
 
-    <div class="container">
-        <!-- Slot Iklan Banner (Adsterra) -->
-        <div class="ad-space" id="ad-banner-top">
+    <div class="container" id="mainMenu">
+        <!-- Slot Iklan Banner Atas (Adsterra) -->
+        <div class="ad-space">
             <!-- PASTE SCRIPT BANNER ADSTERRA DISINI -->
             Iklan Banner 728x90
         </div>
 
-        <h2 style="margin-bottom: 20px;">Film Terbaru</h2>
+        <h2 style="margin-bottom: 20px;" id="sectionTitle">Film Terbaru</h2>
         
-        <div class="movie-grid" id="movie-list">
-            <!-- Konten Film Akan Muncul Disini dari JavaScript -->
+        <!-- Daftar Grid Film -->
+        <div class="movie-grid" id="movieList">
+            <!-- Film akan diisi otomatis lewat JavaScript -->
         </div>
     </div>
 
-    <!-- Modal Player -->
-    <div id="playerModal" class="modal">
-        <div class="modal-content">
-            <span class="close-btn" onclick="closePlayer()">&times;</span>
+    <!-- Halaman Nonton Film (Muncul Fullscreen saat film diklik) -->
+    <div id="playerPage" class="player-page">
+        <div class="player-content">
+            <!-- Tombol Kembali ke Menu Utama -->
+            <button class="btn-back" onclick="closePlayer()">← Kembali ke Menu Utama</button>
+            
             <div class="video-container">
                 <iframe id="mainPlayer" src="" allowfullscreen></iframe>
             </div>
-            <h2 id="modalTitle">Judul Film</h2>
-            <p id="modalDesc" style="color: #ccc; margin: 10px 0;"></p>
             
-            <!-- Link Direct Adsterra bisa dipasang di tombol ini -->
+            <h2 id="playerTitle">Judul Film</h2>
+            <p id="playerDesc" style="color: #a4b0be; margin: 15px 0; line-height: 1.6;"></p>
+            
+            <!-- Tombol Monetisasi Adsterra -->
             <a href="#" id="watchLink" target="_blank" class="btn-action">Tonton Full Screen</a>
             <a href="#" id="downloadLink" target="_blank" class="btn-action btn-download">Download HD</a>
         </div>
     </div>
 
     <footer>
-        &copy; 2024 MovieStation - Nonton Film Gratis Online
+        &copy; 2026 MovieStation - Nonton Film Gratis Online
     </footer>
 
     <script>
-        // DATA FILM - Anda tinggal tambah/edit list ini saja untuk ganti film
+        // DATA FILM - Tambah/Kurangi Film di Sini
         const movies = [
             {
                 id: 1,
                 title: "Big Buck Bunny (Animation)",
                 poster: "https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=500",
-                desc: "Kisah petualangan kelinci raksasa melawan tupai-tupai usil.",
-                video: "https://www.youtube.com/embed/dQw4w9WgXcQ", // Link Embed
-                direct: "https://google.com" // GANTI DENGAN DIRECT LINK ADSTERRA
+                desc: "Kisah petualangan kelinci raksasa yang ramah melawan sekelompok tupai usil pengacau hutan.",
+                video: "https://www.youtube.com/embed/dQw4w9WgXcQ", // Link Embed Pemutar
+                direct: "https://google.com" // MASUKKAN DIRECT LINK ADSTERRA ANDA
             },
             {
                 id: 2,
-                title: "Sintel (Fantasy)",
+                title: "Sintel (Fantasy Drama)",
                 poster: "https://images.unsplash.com/photo-1485846234645-a62644f84728?w=500",
-                desc: "Perjalanan seorang gadis mencari naga kecilnya yang hilang.",
-                video: "https://www.youtube.com/embed/eRsGyueVLvQ",
-                direct: "https://google.com" // GANTI DENGAN DIRECT LINK ADSTERRA
+                desc: "Perjalanan emosional seorang gadis pengembara bernama Sintel yang mencari naga kecil peliharaannya yang diculik.",
+                video: "https://www.youtube.com/embed/eRsGyueVLvQ", // Link Embed Pemutar
+                direct: "https://google.com" // MASUKKAN DIRECT LINK ADSTERRA ANDA
             }
-            // Tambahkan film lainnya di sini...
         ];
 
-        const movieList = document.getElementById('movie-list');
+        // Fungsi Menampilkan Film di Halaman Utama
+        function displayMovies(moviesToRender) {
+            const listContainer = document.getElementById('movieList');
+            if(moviesToRender.length === 0) {
+                listContainer.innerHTML = `<div class="no-results">Film yang Anda cari tidak ditemukan.</div>`;
+                return;
+            }
 
-        function renderMovies() {
-            movieList.innerHTML = movies.map(movie => `
+            listContainer.innerHTML = moviesToRender.map(movie => `
                 <div class="movie-card" onclick="openPlayer(${movie.id})">
                     <img src="${movie.poster}" class="movie-poster" alt="${movie.title}">
                     <div class="movie-info">
                         <div class="movie-title">${movie.title}</div>
                         <div class="movie-meta">
-                            <span>2024</span>
-                            <span style="color: #f1c40f;">★ 8.5</span>
+                            <span>2026</span>
+                            <span style="color: #f1c40f;">★ 8.7</span>
                         </div>
                     </div>
                 </div>
             `).join('');
         }
 
+        // Fitur Pencarian Langsung (Live Search)
+        function searchMovie() {
+            const query = document.getElementById('searchInput').value.toLowerCase();
+            const filteredMovies = movies.filter(movie => movie.title.toLowerCase().includes(query));
+            displayMovies(filteredMovies);
+            
+            const titleElement = document.getElementById('sectionTitle');
+            titleElement.innerText = query ? `Hasil Pencarian: "${query}"` : "Film Terbaru";
+        }
+
+        // Fungsi Buka Player Nonton Film
         function openPlayer(id) {
             const movie = movies.find(m => m.id === id);
-            document.getElementById('mainPlayer').src = movie.video;
-            document.getElementById('modalTitle').innerText = movie.title;
-            document.getElementById('modalDesc').innerText = movie.desc;
             
-            // Pasang Link Adsterra
+            // Masukkan data film ke player halaman nonton
+            document.getElementById('mainPlayer').src = movie.video;
+            document.getElementById('playerTitle').innerText = movie.title;
+            document.getElementById('playerDesc').innerText = movie.desc;
+            
+            // Hubungkan tombol aksi ke Direct Link Adsterra Anda
             document.getElementById('watchLink').href = movie.direct;
             document.getElementById('downloadLink').href = movie.direct;
 
-            document.getElementById('playerModal').style.display = 'block';
+            // Sembunyikan menu utama, tampilkan halaman nonton
+            document.getElementById('mainMenu').style.display = 'none';
+            document.getElementById('playerPage').style.display = 'block';
+            window.scrollTo(0,0);
         }
 
+        // Fungsi Tombol Kembali ke Menu Utama
         function closePlayer() {
-            document.getElementById('playerModal').style.display = 'none';
+            // Matikan video iframe agar suaranya berhenti saat kembali
             document.getElementById('mainPlayer').src = '';
+
+            // Tampilkan kembali menu utama, sembunyikan player
+            document.getElementById('playerPage').style.display = 'none';
+            document.getElementById('mainMenu').style.display = 'block';
         }
 
-        // Jalankan render
-        renderMovies();
+        // Jalankan website pertama kali
+        displayMovies(movies);
     </script>
 </body>
 </html>
