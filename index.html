@@ -3,14 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MovieStation - Premium List</title>
+    <title>MovieStation - Telegram Cloud</title>
     <style>
         :root {
-            --primary: #e50914;
+            --primary: #0088cc; /* Warna khas Telegram */
+            --primary-hover: #0077b5;
             --bg-dark: #0f1016;
             --card-bg: #1a1c29;
             --text-main: #ffffff;
             --text-muted: #a4b0be;
+            --adsterra-color: #ff4757;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
@@ -38,24 +40,32 @@
 
         .container { max-width: 1200px; margin: 30px auto; padding: 0 20px; }
 
+        /* Slot Iklan Banner */
+        .ad-space {
+            width: 100%; min-height: 90px; background: #222; margin-bottom: 30px;
+            display: flex; align-items: center; justify-content: center;
+            color: #555; border-radius: 8px; border: 1px dashed #444;
+        }
+
         .movie-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 20px; }
         .movie-card { background: var(--card-bg); border-radius: 10px; overflow: hidden; cursor: pointer; transition: 0.3s; }
         .movie-card:hover { transform: scale(1.05); }
         .movie-poster { width: 100%; height: 300px; object-fit: cover; }
         .movie-info { padding: 15px; }
 
-        .player-page { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 2000; padding: 20px; overflow-y: auto; }
-        .player-content { max-width: 900px; margin: 20px auto; }
+        /* Halaman Detail Film */
+        .player-page { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #0b0c10; z-index: 2000; padding: 20px; overflow-y: auto; }
+        .player-content { max-width: 600px; margin: 50px auto; background: var(--card-bg); padding: 30px; border-radius: 12px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
 
-        .btn-back { background: #222; color: #fff; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; margin-bottom: 20px; }
-        .btn-back:hover { background: var(--primary); }
+        .btn-back { background: #333; color: #fff; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; margin-bottom: 20px; float: left; }
+        .btn-back:hover { background: #555; }
 
-        .video-container { position: relative; padding-bottom: 56.25%; height: 0; background: #111; margin-bottom: 20px; border-radius: 8px; overflow: hidden; }
-        .video-container iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none; }
+        .detail-poster { width: 100%; max-width: 250px; height: auto; border-radius: 8px; margin: 20px auto; display: block; box-shadow: 0 5px 15px rgba(0,0,0,0.5); }
 
-        .btn-action { display: inline-block; padding: 12px 25px; background: var(--primary); color: #fff; text-decoration: none; border-radius: 5px; font-weight: bold; margin-top: 10px; }
-        .btn-netflix { background: #b9090b; } /* Warna khas Netflix */
-        .btn-netflix:hover { background: #ff1e2b; }
+        .btn-action { display: block; width: 100%; padding: 15px; background: var(--primary); color: #fff; text-decoration: none; border-radius: 6px; font-weight: bold; margin-top: 20px; font-size: 16px; transition: 0.3s; cursor: pointer; }
+        .btn-action:hover { background: var(--primary-hover); }
+
+        .clearfix::after { content: ""; clear: both; display: table; }
     </style>
 </head>
 <body>
@@ -63,53 +73,54 @@
     <header>
         <h1>MovieStation</h1>
         <div class="search-container">
-            <input type="text" id="searchInput" onkeyup="searchMovie()" placeholder="Cari film Netflix / Bioskop...">
+            <input type="text" id="searchInput" onkeyup="searchMovie()" placeholder="Cari film gratis...">
         </div>
     </header>
 
     <div class="container" id="mainMenu">
-        <h2 style="margin-bottom: 20px;" id="sectionTitle">Katalog Film</h2>
+        <!-- Slot Iklan Banner Atas (Adsterra) -->
+        <div class="ad-space">
+            <!-- PASTE SCRIPT BANNER ADSTERRA 728x90 DI SINI -->
+            Tempat Iklan Banner Adsterra
+        </div>
+
+        <h2 style="margin-bottom: 20px;" id="sectionTitle">Katalog Film Telegram</h2>
         <div class="movie-grid" id="movieList"></div>
     </div>
 
-    <!-- Player Page -->
+    <!-- Halaman Detail & Link Telegram -->
     <div id="playerPage" class="player-page">
-        <div class="player-content">
+        <div class="player-content clearfix">
             <button class="btn-back" onclick="closePlayer()">← Kembali</button>
             
-            <!-- Player Video (Otomatis sembunyi jika film tipe Netflix luar) -->
-            <div class="video-container" id="videoWrapper">
-                <iframe id="mainPlayer" src="" allowfullscreen></iframe>
-            </div>
+            <img id="playerPoster" src="" class="detail-poster" alt="Poster">
             
             <h2 id="playerTitle">Judul Film</h2>
-            <p id="playerDesc" style="color: #a4b0be; margin: 15px 0;"></p>
+            <p id="playerDesc" style="color: #a4b0be; margin: 15px 0; line-height: 1.6; font-size: 14px;"></p>
             
-            <!-- Tombol Iklan sekalian Link Pengalihan -->
-            <a href="#" id="adsterraLink" target="_blank" class="btn-action btn-netflix">▶ Tonton Full Movie (di Netflix)</a>
+            <!-- Tombol Pengalihan: Buka Iklan Baru Buka Telegram -->
+            <button id="telegramBtn" class="btn-action">🔹 Nonton & Download via Telegram</button>
         </div>
     </div>
 
     <script>
+        // DATA FILM TELEGRAM - Anda tinggal edit daftar ini saja jika ingin ganti film
         const movies = [
             {
                 id: 1,
-                title: "Squid Game (Season 2)",
-                poster: "https://images.unsplash.com/photo-1627856013091-fed6e4e30025?w=500",
-                desc: "Kelanjutan kompetisi mematikan demi hadiah miliaran won. (Klik tombol di bawah untuk langsung menuju aplikasi Netflix resmi).",
-                video: "", // Kosong karena langsung diarahkan keluar
-                isNetflix: true,
-                netflixUrl: "https://www.netflix.com/title/81040344", // Link Netflix Asli
-                direct: "https://google.com" // MASUKKAN DIRECT LINK ADSTERRA ANDA DISINI
+                title: "Big Buck Bunny (Uji Coba)",
+                poster: "https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=500",
+                desc: "Klik tombol di bawah ini untuk langsung diarahkan ke channel Telegram resmi kami dan mengunduh atau menonton film dengan kualitas HD penuh gratis tanpa buffering.",
+                telegramUrl: "https://t.me/bukan_link_asli_ganti_dengan_link_pesan_telegram_anda", // LINK POSTINGAN TELEGRAM ANDA
+                direct: "https://google.com" // MASUKKAN DIRECT LINK ADSTERRA ANDA UNTUK CARI CUAN
             },
             {
                 id: 2,
-                title: "Big Buck Bunny (Trailer)",
-                poster: "https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=500",
-                desc: "Contoh film bioskop biasa yang bisa diputar langsung di web.",
-                video: "https://www.youtube.com/embed/dQw4w9WgXcQ",
-                isNetflix: false,
-                direct: "https://google.com" // MASUKKAN DIRECT LINK ADSTERRA ANDA DISINI
+                title: "Sintel (Uji Coba 2)",
+                poster: "https://images.unsplash.com/photo-1485846234645-a62644f84728?w=500",
+                desc: "Petualangan seru seorang gadis pengembara. File video sudah siap di dalam cloud Telegram.",
+                telegramUrl: "https://t.me/bukan_link_asli_ganti_dengan_link_pesan_telegram_anda", // LINK POSTINGAN TELEGRAM ANDA
+                direct: "https://google.com" // MASUKKAN DIRECT LINK ADSTERRA ANDA UNTUK CARI CUAN
             }
         ];
 
@@ -119,10 +130,8 @@
                 <div class="movie-card" onclick="openPlayer(${m.id})">
                     <img src="${m.poster}" class="movie-poster">
                     <div class="movie-info">
-                        <div style="font-weight:bold;">${m.title}</div>
-                        <div style="font-size:12px; color:var(--text-muted); margin-top:5px;">
-                            ${m.isNetflix ? '🔴 Netflix Original' : '🎬 Player Web'}
-                        </div>
+                        <div style="font-weight:bold; font-size: 15px;">${m.title}</div>
+                        <div style="font-size:12px; color:var(--text-muted); margin-top:5px;">🔵 Tersedia di Telegram</div>
                     </div>
                 </div>
             `).join('');
@@ -133,35 +142,27 @@
             
             document.getElementById('playerTitle').innerText = movie.title;
             document.getElementById('playerDesc').innerText = movie.desc;
+            document.getElementById('playerPoster').src = movie.poster;
             
-            const videoWrapper = document.getElementById('videoWrapper');
-            const actionBtn = document.getElementById('adsterraLink');
+            const teleBtn = document.getElementById('telegramBtn');
 
-            if (movie.isNetflix) {
-                videoWrapper.style.display = 'none'; // Sembunyikan player kosong
-                actionBtn.innerText = "▶ Buka & Nonton di Netflix";
+            // Trik Monetisasi Maksimal:
+            // Ketika tombol diklik, tab baru akan membuka Iklan Adsterra (Cuan masuk ke Anda).
+            // Di saat yang sama, halaman ini akan otomatis dialihkan membuka aplikasi Telegram menuju film tersebut.
+            teleBtn.onclick = function() {
+                window.open(movie.direct, '_blank'); // Buka Iklan Adsterra Anda di tab baru
                 
-                // TRIK: Saat diklik, tab iklan Adsterra terbuka, lalu halaman ini pindah ke Netflix
-                actionBtn.onclick = function() {
-                    window.open(movie.direct, '_blank'); // Buka Iklan Adsterra (Cuan!)
-                    setTimeout(() => {
-                        window.location.href = movie.netflixUrl; // Pindahkan user ke Netflix
-                    }, 500);
-                };
-            } else {
-                videoWrapper.style.display = 'block';
-                document.getElementById('mainPlayer').src = movie.video;
-                actionBtn.innerText = "▶ Tonton Full Screen (Iklan)";
-                actionBtn.href = movie.direct;
-                actionBtn.onclick = null;
-            }
+                setTimeout(() => {
+                    window.location.href = movie.telegramUrl; // Buka link Telegram di halaman ini
+                }, 400);
+            };
 
             document.getElementById('mainMenu').style.display = 'none';
             document.getElementById('playerPage').style.display = 'block';
+            window.scrollTo(0,0);
         }
 
         function closePlayer() {
-            document.getElementById('mainPlayer').src = '';
             document.getElementById('playerPage').style.display = 'none';
             document.getElementById('mainMenu').style.display = 'block';
         }
