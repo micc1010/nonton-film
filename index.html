@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MovieStation - Streaming & Download</title>
+    <title>MovieStation - Premium List</title>
     <style>
         :root {
             --primary: #e50914;
@@ -13,10 +13,9 @@
             --text-muted: #a4b0be;
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
         body { background-color: var(--bg-dark); color: var(--text-main); }
 
-        /* Header & Kolom Pencarian */
         header {
             background-color: rgba(15, 16, 22, 0.95);
             padding: 15px 5%;
@@ -31,285 +30,147 @@
 
         header h1 { color: var(--primary); font-size: 24px; text-transform: uppercase; letter-spacing: 2px; }
 
-        .search-container {
-            position: relative;
-            width: 300px;
-        }
-
+        .search-container { position: relative; width: 300px; }
         .search-container input {
-            width: 100%;
-            padding: 10px 15px;
-            background: #222533;
-            border: 1px solid #33384f;
-            border-radius: 20px;
-            color: white;
-            font-size: 14px;
-            outline: none;
-            transition: 0.3s;
-        }
-
-        .search-container input:focus {
-            border-color: var(--primary);
-            box-shadow: 0 0 8px rgba(229, 9, 20, 0.5);
+            width: 100%; padding: 10px 15px; background: #222533;
+            border: 1px solid #33384f; border-radius: 20px; color: white; outline: none;
         }
 
         .container { max-width: 1200px; margin: 30px auto; padding: 0 20px; }
 
-        /* Area Iklan */
-        .ad-space {
-            width: 100%;
-            min-height: 90px;
-            background: #222;
-            margin-bottom: 30px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #555;
-            border-radius: 8px;
-            border: 1px dashed #444;
-        }
-
-        /* Movie Grid */
-        .movie-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-            gap: 20px;
-        }
-
-        .movie-card {
-            background: var(--card-bg);
-            border-radius: 10px;
-            overflow: hidden;
-            transition: transform 0.3s ease;
-            cursor: pointer;
-            position: relative;
-        }
-
-        .movie-card:hover { transform: scale(1.05); z-index: 5; }
+        .movie-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 20px; }
+        .movie-card { background: var(--card-bg); border-radius: 10px; overflow: hidden; cursor: pointer; transition: 0.3s; }
+        .movie-card:hover { transform: scale(1.05); }
         .movie-poster { width: 100%; height: 300px; object-fit: cover; }
         .movie-info { padding: 15px; }
-        .movie-title { font-size: 16px; font-weight: bold; margin-bottom: 5px; }
-        .movie-meta { font-size: 12px; color: var(--text-muted); display: flex; justify-content: space-between; }
 
-        /* Halaman Nonton / Player Overlay */
-        .player-page {
-            display: none;
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: #000;
-            z-index: 2000;
-            overflow-y: auto;
-            padding: 20px;
-        }
+        .player-page { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 2000; padding: 20px; overflow-y: auto; }
+        .player-content { max-width: 900px; margin: 20px auto; }
 
-        .player-content {
-            max-width: 900px;
-            margin: 20px auto;
-        }
+        .btn-back { background: #222; color: #fff; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; margin-bottom: 20px; }
+        .btn-back:hover { background: var(--primary); }
 
-        /* Tombol Kembali */
-        .btn-back {
-            display: inline-flex;
-            align-items: center;
-            background: #222;
-            color: #fff;
-            border: none;
-            padding: 10px 20px;
-            font-size: 14px;
-            font-weight: bold;
-            border-radius: 5px;
-            cursor: pointer;
-            margin-bottom: 20px;
-            transition: 0.3s;
-            text-transform: uppercase;
-        }
+        .video-container { position: relative; padding-bottom: 56.25%; height: 0; background: #111; margin-bottom: 20px; border-radius: 8px; overflow: hidden; }
+        .video-container iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none; }
 
-        .btn-back:hover {
-            background: var(--primary);
-        }
-
-        .video-container {
-            position: relative;
-            padding-bottom: 56.25%;
-            height: 0;
-            background: #111;
-            margin-bottom: 20px;
-            border-radius: 8px;
-            overflow: hidden;
-            box-shadow: 0 0 20px rgba(229, 9, 20, 0.3);
-        }
-
-        .video-container iframe {
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%; border: none;
-        }
-
-        .btn-action {
-            display: inline-block;
-            padding: 12px 25px;
-            background: var(--primary);
-            color: #fff;
-            text-decoration: none;
-            border-radius: 5px;
-            font-weight: bold;
-            margin-top: 10px;
-            transition: 0.3s;
-        }
-
-        .btn-download { background: #2ed573; margin-left: 10px; }
-        .btn-download:hover { background: #26af5f; }
-        .btn-action:hover:not(.btn-download) { background: #ff1e2b; }
-
-        .no-results {
-            text-align: center;
-            color: var(--text-muted);
-            grid-column: 1 / -1;
-            padding: 50px 0;
-        }
-
-        footer { text-align: center; padding: 40px; color: var(--text-muted); font-size: 14px; margin-top: 50px; }
+        .btn-action { display: inline-block; padding: 12px 25px; background: var(--primary); color: #fff; text-decoration: none; border-radius: 5px; font-weight: bold; margin-top: 10px; }
+        .btn-netflix { background: #b9090b; } /* Warna khas Netflix */
+        .btn-netflix:hover { background: #ff1e2b; }
     </style>
 </head>
 <body>
 
-    <!-- Header dengan Fitur Pencarian -->
     <header>
         <h1>MovieStation</h1>
         <div class="search-container">
-            <input type="text" id="searchInput" onkeyup="searchMovie()" placeholder="Cari film di sini...">
+            <input type="text" id="searchInput" onkeyup="searchMovie()" placeholder="Cari film Netflix / Bioskop...">
         </div>
     </header>
 
     <div class="container" id="mainMenu">
-        <!-- Slot Iklan Banner Atas (Adsterra) -->
-        <div class="ad-space">
-            <!-- PASTE SCRIPT BANNER ADSTERRA DISINI -->
-            Iklan Banner 728x90
-        </div>
-
-        <h2 style="margin-bottom: 20px;" id="sectionTitle">Film Terbaru</h2>
-        
-        <!-- Daftar Grid Film -->
-        <div class="movie-grid" id="movieList">
-            <!-- Film akan diisi otomatis lewat JavaScript -->
-        </div>
+        <h2 style="margin-bottom: 20px;" id="sectionTitle">Katalog Film</h2>
+        <div class="movie-grid" id="movieList"></div>
     </div>
 
-    <!-- Halaman Nonton Film (Muncul Fullscreen saat film diklik) -->
+    <!-- Player Page -->
     <div id="playerPage" class="player-page">
         <div class="player-content">
-            <!-- Tombol Kembali ke Menu Utama -->
-            <button class="btn-back" onclick="closePlayer()">← Kembali ke Menu Utama</button>
+            <button class="btn-back" onclick="closePlayer()">← Kembali</button>
             
-            <div class="video-container">
+            <!-- Player Video (Otomatis sembunyi jika film tipe Netflix luar) -->
+            <div class="video-container" id="videoWrapper">
                 <iframe id="mainPlayer" src="" allowfullscreen></iframe>
             </div>
             
             <h2 id="playerTitle">Judul Film</h2>
-            <p id="playerDesc" style="color: #a4b0be; margin: 15px 0; line-height: 1.6;"></p>
+            <p id="playerDesc" style="color: #a4b0be; margin: 15px 0;"></p>
             
-            <!-- Tombol Monetisasi Adsterra -->
-            <a href="#" id="watchLink" target="_blank" class="btn-action">Tonton Full Screen</a>
-            <a href="#" id="downloadLink" target="_blank" class="btn-action btn-download">Download HD</a>
+            <!-- Tombol Iklan sekalian Link Pengalihan -->
+            <a href="#" id="adsterraLink" target="_blank" class="btn-action btn-netflix">▶ Tonton Full Movie (di Netflix)</a>
         </div>
     </div>
 
-    <footer>
-        &copy; 2026 MovieStation - Nonton Film Gratis Online
-    </footer>
-
     <script>
-        // DATA FILM - Tambah/Kurangi Film di Sini
         const movies = [
             {
                 id: 1,
-                title: "Big Buck Bunny (Animation)",
-                poster: "https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=500",
-                desc: "Kisah petualangan kelinci raksasa yang ramah melawan sekelompok tupai usil pengacau hutan.",
-                video: "https://www.youtube.com/embed/dQw4w9WgXcQ", // Link Embed Pemutar
-                direct: "https://google.com" // MASUKKAN DIRECT LINK ADSTERRA ANDA
+                title: "Squid Game (Season 2)",
+                poster: "https://images.unsplash.com/photo-1627856013091-fed6e4e30025?w=500",
+                desc: "Kelanjutan kompetisi mematikan demi hadiah miliaran won. (Klik tombol di bawah untuk langsung menuju aplikasi Netflix resmi).",
+                video: "", // Kosong karena langsung diarahkan keluar
+                isNetflix: true,
+                netflixUrl: "https://www.netflix.com/title/81040344", // Link Netflix Asli
+                direct: "https://google.com" // MASUKKAN DIRECT LINK ADSTERRA ANDA DISINI
             },
             {
                 id: 2,
-                title: "Sintel (Fantasy Drama)",
-                poster: "https://images.unsplash.com/photo-1485846234645-a62644f84728?w=500",
-                desc: "Perjalanan emosional seorang gadis pengembara bernama Sintel yang mencari naga kecil peliharaannya yang diculik.",
-                video: "https://www.youtube.com/embed/eRsGyueVLvQ", // Link Embed Pemutar
-                direct: "https://google.com" // MASUKKAN DIRECT LINK ADSTERRA ANDA
-            },
-            {
-                id: 3,
-                title: "Squid Game (Netflix Original)",
-                poster: "https://images.unsplash.com/photo-1627856013091-fed6e4e30025?w=500", // Contoh poster
-                desc: "Ratusan pemain yang membutuhkan uang menerima undangan aneh untuk bertanding dalam permainan anak-anak.",
-                video: "", // Dikosongkan karena tidak bisa di-embed
-                direct: "https://link-adsterra-anda.com", // Iklan Adsterra Anda
-                originalLink: "https://www.netflix.com/title/81040344" // Link film di Netflix
+                title: "Big Buck Bunny (Trailer)",
+                poster: "https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=500",
+                desc: "Contoh film bioskop biasa yang bisa diputar langsung di web.",
+                video: "https://www.youtube.com/embed/dQw4w9WgXcQ",
+                isNetflix: false,
+                direct: "https://google.com" // MASUKKAN DIRECT LINK ADSTERRA ANDA DISINI
             }
         ];
 
-        // Fungsi Menampilkan Film di Halaman Utama
-        function displayMovies(moviesToRender) {
-            const listContainer = document.getElementById('movieList');
-            if(moviesToRender.length === 0) {
-                listContainer.innerHTML = `<div class="no-results">Film yang Anda cari tidak ditemukan.</div>`;
-                return;
-            }
-
-            listContainer.innerHTML = moviesToRender.map(movie => `
-                <div class="movie-card" onclick="openPlayer(${movie.id})">
-                    <img src="${movie.poster}" class="movie-poster" alt="${movie.title}">
+        function displayMovies(data) {
+            const list = document.getElementById('movieList');
+            list.innerHTML = data.map(m => `
+                <div class="movie-card" onclick="openPlayer(${m.id})">
+                    <img src="${m.poster}" class="movie-poster">
                     <div class="movie-info">
-                        <div class="movie-title">${movie.title}</div>
-                        <div class="movie-meta">
-                            <span>2026</span>
-                            <span style="color: #f1c40f;">★ 8.7</span>
+                        <div style="font-weight:bold;">${m.title}</div>
+                        <div style="font-size:12px; color:var(--text-muted); margin-top:5px;">
+                            ${m.isNetflix ? '🔴 Netflix Original' : '🎬 Player Web'}
                         </div>
                     </div>
                 </div>
             `).join('');
         }
 
-        // Fitur Pencarian Langsung (Live Search)
-        function searchMovie() {
-            const query = document.getElementById('searchInput').value.toLowerCase();
-            const filteredMovies = movies.filter(movie => movie.title.toLowerCase().includes(query));
-            displayMovies(filteredMovies);
-            
-            const titleElement = document.getElementById('sectionTitle');
-            titleElement.innerText = query ? `Hasil Pencarian: "${query}"` : "Film Terbaru";
-        }
-
-        // Fungsi Buka Player Nonton Film
         function openPlayer(id) {
             const movie = movies.find(m => m.id === id);
             
-            // Masukkan data film ke player halaman nonton
-            document.getElementById('mainPlayer').src = movie.video;
             document.getElementById('playerTitle').innerText = movie.title;
             document.getElementById('playerDesc').innerText = movie.desc;
             
-            // Hubungkan tombol aksi ke Direct Link Adsterra Anda
-            document.getElementById('watchLink').href = movie.direct;
-            document.getElementById('downloadLink').href = movie.direct;
+            const videoWrapper = document.getElementById('videoWrapper');
+            const actionBtn = document.getElementById('adsterraLink');
 
-            // Sembunyikan menu utama, tampilkan halaman nonton
+            if (movie.isNetflix) {
+                videoWrapper.style.display = 'none'; // Sembunyikan player kosong
+                actionBtn.innerText = "▶ Buka & Nonton di Netflix";
+                
+                // TRIK: Saat diklik, tab iklan Adsterra terbuka, lalu halaman ini pindah ke Netflix
+                actionBtn.onclick = function() {
+                    window.open(movie.direct, '_blank'); // Buka Iklan Adsterra (Cuan!)
+                    setTimeout(() => {
+                        window.location.href = movie.netflixUrl; // Pindahkan user ke Netflix
+                    }, 500);
+                };
+            } else {
+                videoWrapper.style.display = 'block';
+                document.getElementById('mainPlayer').src = movie.video;
+                actionBtn.innerText = "▶ Tonton Full Screen (Iklan)";
+                actionBtn.href = movie.direct;
+                actionBtn.onclick = null;
+            }
+
             document.getElementById('mainMenu').style.display = 'none';
             document.getElementById('playerPage').style.display = 'block';
-            window.scrollTo(0,0);
         }
 
-        // Fungsi Tombol Kembali ke Menu Utama
         function closePlayer() {
-            // Matikan video iframe agar suaranya berhenti saat kembali
             document.getElementById('mainPlayer').src = '';
-
-            // Tampilkan kembali menu utama, sembunyikan player
             document.getElementById('playerPage').style.display = 'none';
             document.getElementById('mainMenu').style.display = 'block';
         }
 
-        // Jalankan website pertama kali
+        function searchMovie() {
+            const q = document.getElementById('searchInput').value.toLowerCase();
+            displayMovies(movies.filter(m => m.title.toLowerCase().includes(q)));
+        }
+
         displayMovies(movies);
     </script>
 </body>
