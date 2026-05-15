@@ -1,0 +1,232 @@
+
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MovieStation - Streaming & Download</title>
+    <style>
+        :root {
+            --primary: #e50914;
+            --bg-dark: #0f1016;
+            --card-bg: #1a1c29;
+            --text-main: #ffffff;
+            --text-muted: #a4b0be;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background-color: var(--bg-dark); color: var(--text-main); }
+
+        header {
+            background-color: rgba(15, 16, 22, 0.95);
+            padding: 15px 5%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid var(--primary);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        header h1 { color: var(--primary); font-size: 24px; text-transform: uppercase; letter-spacing: 2px; }
+
+        .container { max-width: 1200px; margin: 30px auto; padding: 0 20px; }
+
+        /* Area Iklan */
+        .ad-space {
+            width: 100%;
+            min-height: 90px;
+            background: #222;
+            margin-bottom: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #555;
+            border-radius: 8px;
+            border: 1px dashed #444;
+        }
+
+        /* Movie Grid */
+        .movie-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 20px;
+        }
+
+        .movie-card {
+            background: var(--card-bg);
+            border-radius: 10px;
+            overflow: hidden;
+            transition: transform 0.3s ease;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .movie-card:hover { transform: scale(1.05); z-index: 5; }
+
+        .movie-poster { width: 100%; height: 300px; object-fit: cover; }
+
+        .movie-info { padding: 15px; }
+        .movie-title { font-size: 16px; font-weight: bold; margin-bottom: 5px; }
+        .movie-meta { font-size: 12px; color: var(--text-muted); display: flex; justify-content: space-between; }
+
+        /* Modal Player */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.9);
+            z-index: 2000;
+            overflow-y: auto;
+        }
+
+        .modal-content {
+            max-width: 900px;
+            margin: 50px auto;
+            background: #000;
+            padding: 20px;
+            border-radius: 12px;
+            position: relative;
+        }
+
+        .close-btn {
+            position: absolute;
+            right: 20px; top: 10px;
+            font-size: 30px; color: #fff; cursor: pointer;
+        }
+
+        .video-container {
+            position: relative;
+            padding-bottom: 56.25%;
+            height: 0;
+            background: #000;
+            margin-bottom: 20px;
+        }
+
+        .video-container iframe {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%; border: none;
+        }
+
+        .btn-action {
+            display: inline-block;
+            padding: 10px 20px;
+            background: var(--primary);
+            color: #fff;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+
+        .btn-download { background: #2ed573; margin-left: 10px; }
+
+        footer { text-align: center; padding: 40px; color: var(--text-muted); font-size: 14px; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>MovieStation</h1>
+        <div id="search-box">
+            <!-- Search bar bisa ditambahkan di sini -->
+        </div>
+    </header>
+
+    <div class="container">
+        <!-- Slot Iklan Banner (Adsterra) -->
+        <div class="ad-space" id="ad-banner-top">
+            <!-- PASTE SCRIPT BANNER ADSTERRA DISINI -->
+            Iklan Banner 728x90
+        </div>
+
+        <h2 style="margin-bottom: 20px;">Film Terbaru</h2>
+        
+        <div class="movie-grid" id="movie-list">
+            <!-- Konten Film Akan Muncul Disini dari JavaScript -->
+        </div>
+    </div>
+
+    <!-- Modal Player -->
+    <div id="playerModal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closePlayer()">&times;</span>
+            <div class="video-container">
+                <iframe id="mainPlayer" src="" allowfullscreen></iframe>
+            </div>
+            <h2 id="modalTitle">Judul Film</h2>
+            <p id="modalDesc" style="color: #ccc; margin: 10px 0;"></p>
+            
+            <!-- Link Direct Adsterra bisa dipasang di tombol ini -->
+            <a href="#" id="watchLink" target="_blank" class="btn-action">Tonton Full Screen</a>
+            <a href="#" id="downloadLink" target="_blank" class="btn-action btn-download">Download HD</a>
+        </div>
+    </div>
+
+    <footer>
+        &copy; 2024 MovieStation - Nonton Film Gratis Online
+    </footer>
+
+    <script>
+        // DATA FILM - Anda tinggal tambah/edit list ini saja untuk ganti film
+        const movies = [
+            {
+                id: 1,
+                title: "Big Buck Bunny (Animation)",
+                poster: "https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=500",
+                desc: "Kisah petualangan kelinci raksasa melawan tupai-tupai usil.",
+                video: "https://www.youtube.com/embed/dQw4w9WgXcQ", // Link Embed
+                direct: "https://google.com" // GANTI DENGAN DIRECT LINK ADSTERRA
+            },
+            {
+                id: 2,
+                title: "Sintel (Fantasy)",
+                poster: "https://images.unsplash.com/photo-1485846234645-a62644f84728?w=500",
+                desc: "Perjalanan seorang gadis mencari naga kecilnya yang hilang.",
+                video: "https://www.youtube.com/embed/eRsGyueVLvQ",
+                direct: "https://google.com" // GANTI DENGAN DIRECT LINK ADSTERRA
+            }
+            // Tambahkan film lainnya di sini...
+        ];
+
+        const movieList = document.getElementById('movie-list');
+
+        function renderMovies() {
+            movieList.innerHTML = movies.map(movie => `
+                <div class="movie-card" onclick="openPlayer(${movie.id})">
+                    <img src="${movie.poster}" class="movie-poster" alt="${movie.title}">
+                    <div class="movie-info">
+                        <div class="movie-title">${movie.title}</div>
+                        <div class="movie-meta">
+                            <span>2024</span>
+                            <span style="color: #f1c40f;">★ 8.5</span>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function openPlayer(id) {
+            const movie = movies.find(m => m.id === id);
+            document.getElementById('mainPlayer').src = movie.video;
+            document.getElementById('modalTitle').innerText = movie.title;
+            document.getElementById('modalDesc').innerText = movie.desc;
+            
+            // Pasang Link Adsterra
+            document.getElementById('watchLink').href = movie.direct;
+            document.getElementById('downloadLink').href = movie.direct;
+
+            document.getElementById('playerModal').style.display = 'block';
+        }
+
+        function closePlayer() {
+            document.getElementById('playerModal').style.display = 'none';
+            document.getElementById('mainPlayer').src = '';
+        }
+
+        // Jalankan render
+        renderMovies();
+    </script>
+</body>
+</html>
